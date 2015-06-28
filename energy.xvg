@@ -1,0 +1,27 @@
+# This file was created Sun Jun 28 15:39:55 2015
+# Created by:
+# GROMACS:      gmx energy, VERSION 5.0.4
+# Executable:   /opt/apps/gromacs/gromacs-5.0.4-gcc-4.6.3-dbg/bin/gmx_mpi
+# Library dir:  /opt/apps/gromacs/gromacs-5.0.4-gcc-4.6.3-dbg/share/gromacs/top
+# Command line:
+#   gmx_mpi energy -f nvt.edr -o energy.xvg
+# gmx_mpi is part of G R O M A C S:
+#
+# Gromacs Runs On Most of All Computer Systems
+#
+@    title "Gromacs Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(K)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Temperature"
+    0.000000  299.275604
+    1.000000  300.827637
+    2.000000  298.857117
+    3.000000  299.052399
+    3.722000  300.163910

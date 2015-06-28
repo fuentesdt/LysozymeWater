@@ -21,16 +21,43 @@ gmx_mpi genion -s ions.tpr -o 1AKI_solv_ions.gro -p topol.top -pname NA -nname C
 
 gmx_mpi grompp -f minim.mdp -c 1AKI_solv_ions.gro -p topol.top -o em.tpr
 
-gmx_mpi mdrun -v -deffnm em
+gmx_mpi mdrun -v -deffnm em -nb gpu
 
 gmx_mpi energy -f em.edr -o potential.xvg
 	At the prompt, type "10 0" to select Potential (10); zero (0) terminates input.
 
-gnuplot potential.plt  -
+gnuplot potential.plt  
 
 gmx_mpi grompp -f nvt.mdp -c em.gro -p topol.top -o nvt.tpr
 
-gmx_mpi mdrun -v -deffnm nvt
+gmx_mpi mdrun -v -deffnm nvt -nb gpu
 
-gmx_mpi energy -f nvt.edr
+gmx_mpi energy -f nvt.edr -o energy.xvg
 	Type "15 0" at the prompt to select the temperature of the system and exit.
+
+gnuplot energy.plt  
+
+gmx_mpi grompp -f npt.mdp -c nvt.gro -t nvt.cpt -p topol.top -o npt.tpr
+
+gmx_mpi mdrun -v -deffnm npt -nb gpu
+
+gmx_mpi energy -f npt.edr -o pressure.xvg
+	Type "16 0" at the prompt to select the pressure of the system and exit. 
+
+gmx_mpi energy -f npt.edr -o density.xvg
+
+gmx_mpi grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
+
+gmx_mpi mdrun -deffnm md_0_1 -nb gpu
+
+gmx_mpi trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -ur compact
+	Select 0 ("System") for output.
+
+gmx_mpi rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns
+	Choose 4 ("Backbone") for both the least squares fit and the group for RMSD calculation.
+
+
+gmx_mpi rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns
+
+gmx_mpi gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg
+
