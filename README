@@ -1,3 +1,36 @@
-From:
 http://www.bevanlab.biochem.vt.edu/Pages/Personal/justin/gmx-tutorials/lysozyme/index.html
 
+
+Visualize
+=========
+
+$ vglrun /opt/apps/VMD/vmd-1.9.2-install/bin/vmd 1AKI.pdb
+
+
+gmx_mpi pdb2gmx -f 1AKI.pdb -o 1AKI_processed.gro -water spce
+	15: OPLS-AA/L all-atom force field (2001 aminoacid dihedrals)
+
+gmx_mpi editconf -f 1AKI_processed.gro -o 1AKI_newbox.gro -c -d 1.0 -bt cubic
+
+gmx_mpi solvate -cp 1AKI_newbox.gro -cs spc216.gro -o 1AKI_solv.gro -p topol.top
+
+gmx_mpi grompp -f ions.mdp -c 1AKI_solv.gro -p topol.top -o ions.tpr
+
+gmx_mpi genion -s ions.tpr -o 1AKI_solv_ions.gro -p topol.top -pname NA -nname CL -nn 8
+	Group    13 (            SOL) has 36846 elements
+
+gmx_mpi grompp -f minim.mdp -c 1AKI_solv_ions.gro -p topol.top -o em.tpr
+
+gmx_mpi mdrun -v -deffnm em
+
+gmx_mpi energy -f em.edr -o potential.xvg
+	At the prompt, type "10 0" to select Potential (10); zero (0) terminates input.
+
+gnuplot potential.plt  -
+
+gmx_mpi grompp -f nvt.mdp -c em.gro -p topol.top -o nvt.tpr
+
+gmx_mpi mdrun -v -deffnm nvt
+
+gmx_mpi energy -f nvt.edr
+	Type "15 0" at the prompt to select the temperature of the system and exit.
