@@ -49,6 +49,8 @@ gmx_mpi energy -f npt.edr -o density.xvg
 gmx_mpi grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
 
 gmx_mpi mdrun -deffnm md_0_1 -nb gpu
+	vglrun /opt/apps/VMD/vmd-1.9.2-install/bin/vmd md_0_1.gro  (also load trajectory file: md_0_1.trr) 
+		extensions -> vis -> movie maker
 
 gmx_mpi trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -ur compact
 	Select 0 ("System") for output.
