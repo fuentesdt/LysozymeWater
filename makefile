@@ -7,15 +7,24 @@ view:
 	vglrun $(VMD) md_0_1.gro 
 
 
-1AKI_processed.gro: 1AKI.pdb 
-	echo 15 | $(GMX) pdb2gmx -f 1AKI.pdb -o 1AKI_processed.gro -water spce 
+posre.itp topol.top 1AKI_processed.gro: 1AKI.pdb 
+	echo 15 | $(GMX) pdb2gmx -f 1AKI.pdb  -o 1AKI_processed.gro -water spce 
+	echo 14 | $(GMX) pdb2gmx -f 1AKI.pdb  -o 1AKI_processed.gro -water spce 
+	#sed -i '1 i\#include "C2H4O2.itp"' topol.top
+	echo '#include "C2H4O2.itp"' >>  topol.top
 	#15: OPLS-AA/L all-atom force field (2001 aminoacid dihedrals)
 
 1AKI_newbox.gro: 1AKI_processed.gro
 	$(GMX) editconf -f 1AKI_processed.gro -o 1AKI_newbox.gro -c -d 1.0 -bt cubic
 
+1AKI_aceticacid.gro: 1AKI_newbox.gro
+	$(GMX) insert-molecules  -ci C2H4O2.pdb -nmol 1000  -f  $< -o 1AKI_aceticacid.gro
+
+1AKI_solvaceticacid.gro: 1AKI_aceticacid.gro
+	$(GMX) solvate -cp $< -cs spc216.gro -o $@ -p topol.top
+
 1AKI_solv.gro: 1AKI_newbox.gro
-	$(GMX) solvate -cp 1AKI_newbox.gro -cs spc216.gro -o 1AKI_solv.gro -p topol.top
+	$(GMX) solvate -cp $< -cs spc216.gro -o $@ -p topol.top
 
 ions.tpr: 1AKI_solv.gro
 	$(GMX) grompp -f ions.mdp -c 1AKI_solv.gro -p topol.top -o ions.tpr
@@ -24,9 +33,9 @@ ions.tpr: 1AKI_solv.gro
 	echo 13 | $(GMX) genion -s ions.tpr -o 1AKI_solv_ions.gro -p topol.top -pname NA -nname CL -nn 8 
 	#Group    13 (            SOL) has 36846 elements
 
-em.tpr: 1AKI_solv_ions.gro
-	$(GMX) grompp -f minim.mdp -c 1AKI_solv_ions.gro -p topol.top -o em.tpr
-
+#em.tpr: 1AKI_solv_ions.gro
+em.tpr: 1AKI_solvaceticacid.gro
+	$(GMX) grompp -f minim.mdp -c $< -p topol.top -o em.tpr
 	$(GMX) mdrun -v -deffnm em -nb gpu
 
 potential.png: em.edr
