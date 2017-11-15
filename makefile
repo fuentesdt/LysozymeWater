@@ -7,18 +7,17 @@ view:
 	vglrun $(VMD) md_0_1.gro 
 
 
+#15: OPLS-AA/L all-atom force field (2001 aminoacid dihedrals)
 posre.itp topol.top 1AKI_processed.gro: 1AKI.pdb 
-	echo 15 | $(GMX) pdb2gmx -f 1AKI.pdb  -o 1AKI_processed.gro -water spce 
-	echo 14 | $(GMX) pdb2gmx -f 1AKI.pdb  -o 1AKI_processed.gro -water spce 
-	#sed -i '1 i\#include "C2H4O2.itp"' topol.top
-	echo '#include "C2H4O2.itp"' >>  topol.top
-	#15: OPLS-AA/L all-atom force field (2001 aminoacid dihedrals)
+	echo 1  | $(GMX) pdb2gmx -f 1AKI.pdb  -o 1AKI_processed.gro -water spce 
 
 1AKI_newbox.gro: 1AKI_processed.gro
 	$(GMX) editconf -f 1AKI_processed.gro -o 1AKI_newbox.gro -c -d 1.0 -bt cubic
 
 1AKI_aceticacid.gro: 1AKI_newbox.gro
 	$(GMX) insert-molecules  -ci C2H4O2.pdb -nmol 1000  -f  $< -o 1AKI_aceticacid.gro
+	echo '_I0M         1000' >>  topol.top
+	sed -i '8660i  #include "C2H4O2.itp"'  topol.top
 
 1AKI_solvaceticacid.gro: 1AKI_aceticacid.gro
 	$(GMX) solvate -cp $< -cs spc216.gro -o $@ -p topol.top
