@@ -33,7 +33,7 @@ ions.tpr: 1AKI_solv.gro
 	#Group    13 (            SOL) has 36846 elements
 
 #em.tpr: 1AKI_solv_ions.gro
-em.tpr: 1AKI_solvaceticacid.gro
+em.gro: 1AKI_solvaceticacid.gro
 	$(GMX) grompp -f minim.mdp -c $< -p topol.top -o em.tpr
 	$(GMX) mdrun -v -deffnm em -nb gpu
 
@@ -42,11 +42,12 @@ potential.png: em.edr
 	#At the prompt, type "10 0" to select Potential (10); zero (0) terminates input.
 	gnuplot potential.plt  
 
-nvt.tpr:
+nvt.tpr: em.gro
 	$(GMX) grompp -f nvt.mdp -c em.gro -p topol.top -o nvt.tpr
 
-nvt.edr:
+nvt.edr: nvt.tpr
 	$(GMX) mdrun -v -deffnm nvt -nb gpu
+
 energy.png: nvt.edr
 	echo 15 0 | $(GMX) energy -f nvt.edr -o energy.xvg 
 	#Type "15 0" at the prompt to select the temperature of the system and exit.
