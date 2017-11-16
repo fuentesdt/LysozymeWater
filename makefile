@@ -28,12 +28,15 @@ posre.itp topol.top 1AKI_processed.gro: 1AKI.pdb
 ions.tpr: 1AKI_solv.gro
 	$(GMX) grompp -f ions.mdp -c 1AKI_solv.gro -p topol.top -o ions.tpr
 
+#	echo 13 | $(GMX) genion -s ions.tpr -o 1AKI_solv_ions.gro -p topol.top -pname NA -nname CL -nn 8 
+#	Group    13 (            SOL) has 36846 elements
+# add enough NaCl to reach 100 mM salt concentration
+# http://ringo.ams.sunysb.edu/index.php/MD_Simulation:_Protein_in_Water
 1AKI_solv_ions.gro: ions.tpr
-	echo 13 | $(GMX) genion -s ions.tpr -o 1AKI_solv_ions.gro -p topol.top -pname NA -nname CL -nn 8 
-	#Group    13 (            SOL) has 36846 elements
+	echo 13 | $(GMX) genion -s ions.tpr -p topol.top -o 1AKI_solv_ions.gro -pname NA -pq 1 -nname CL -nq -1 -conc 0.4 -neutral
 
-#em.tpr: 1AKI_solv_ions.gro
-em.gro: 1AKI_solvaceticacid.gro
+#em.gro: 1AKI_solvaceticacid.gro
+em.gro: 1AKI_solv_ions.gro
 	$(GMX) grompp -f minim.mdp -c $< -p topol.top -o em.tpr
 	$(GMX) mdrun -v -deffnm em -nb gpu
 
