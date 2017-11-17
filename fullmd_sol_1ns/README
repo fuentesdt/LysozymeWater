@@ -1,0 +1,10 @@
+
+
+echo 4 4 | gmx confrms -f1 1AKI.pdb -f2 fullmd_sol_1ns/md_final_1ns.gro
+vglrun /opt/apps/VMD/vmd-1.9.3-opengl/vmd/vmd_LINUXAMD64 fit.pdb
+
+
+http://compbio.biosci.uq.edu.au/education/mdcourse/Analysis.html
+
+wget http://compbio.biosci.uq.edu.au/education/mdcourse/fullmd_sol_1ns.tar.gz
+
